@@ -1,4 +1,4 @@
-# Charting Toolkit v1.2.2
+# Charting Toolkit v1.3.2
 
 by ShyTheProgrammer
 
@@ -30,7 +30,7 @@ The note arrows change one shared offset in starting-meter bars across every ins
 
 Preview decoding uses up to 256 MB of audio memory (about 23 minutes of stereo sound). Longer recordings can still be exported, with alignment entered numerically. Playback requires an available audio output device. BPM changes move the musical grid; audio is not stretched.
 
-## LRC lyrics and alignment (v1.2.2)
+## LRC lyrics and alignment (v1.3.2)
 
 The **Lyrics** tab replaces the pitched-vocal screen. It opens or creates standard and enhanced LRC, provides editable timestamp/word rows and a raw-text editor, previews lyric markers over the recording waveform, and saves aligned LRC copies. Play/Pause, Stop, a seek slider, row-level **Seek** buttons and click-to-seek support reviewing synchronization. LRC editing and recording playback also work without a loaded Guitar Pro score. Pitched YARG vocals, vocal difficulty tags and `notes.mid` export have been removed.
 
@@ -94,8 +94,40 @@ This exports all three demos under `smoke-output`. `--demo` opens the guitar dem
 
 Derived from Chart Starter by shytheprogrammer, under the MIT license retained in `LICENSE`. The alphaTab license is in `vendor/alphatab/LICENSE`; the Node license is in `vendor/NODE-LICENSE.txt`. The separate bundled FFmpeg executable is the Gyan.dev GPLv3 build `2025-08-25-git-1b62f9d3ae`; its license, source URL and build configuration are in `vendor/FFMPEG-LICENSE.txt` and `vendor/FFMPEG-BUILD-README.txt`. Rust dependency notices accompany the portable distribution under `licenses`, including Rodio/CPAL for native playback. The synthesized demo recordings is provided under this project's MIT license. The original help reference is retained as `ORIGINAL-GUIDE.md`; use the in-app Guide for behavior specific to this Rust edition.
 
-## Preview controls (v1.2.2)
+## Preview controls (v1.3.2)
 
 Extra media contains artwork, backgrounds, stems and other optional assets. All LRC file management, lyric editing and alignment lives in Lyrics. Attach the main recording in the pattern or lyric preview.
 
 Both previews offer quarter-beat navigation and independent Zoom in, Zoom out and Reset zoom controls (1–64 beats). These viewing controls do not alter exported timing. The pattern preview also offers quarter-bar note shifts; these move every instrument and difficulty together and are included in exports.
+
+## Drum cymbals (v1.3.2)
+
+Easy and Medium retain cymbal markers for retained cymbal hits, just like Hard and Expert. Rhythm spacing and simultaneous-hit limits still simplify lower difficulties. Tom hits remain toms.
+
+## Guitar Hero Live parts (v1.3.2)
+
+Enable **GHL Guitar**, **GHL Bass**, and **GHL Rhythm** in Score & tracks. Each has its own source track and rating, and can coexist with five-fret parts. The preview labels all six buttons and OPEN; playback, zoom, and global alignment work for these parts too.
+
+The included Authentic GHL v2 ruleset drives the dedicated mapper: whole-phrase template search, progression-aware chord optimization, deterministic riff-family caching (including transposition and shared prefixes), pedal-tone opens, explicit picking/legato/taps, and trimmed sustains. Chords use at most three buttons, avoiding same-column barres by default. Expert retains source attacks; Easy/Medium/Hard simplify the arrangement at the original timestamps.
+
+In Song details, disable **GHL open pedal tones** to require fretted pedals. **GHL octave folding** is optional and collapses octave-equivalent melody pitches, with review notices. A phrase with more than six distinct melody pitches (or more than six classes after folding) stops export with an explanation, rather than silently collapsing unrelated pitches. Add meaningful phrase boundaries in the source score if needed. Manual per-note overrides are not exposed. Optional simple same-column barres can now be enabled for Hard/Expert.
+
+Exports include Easy/Medium/Hard/Expert GHLGuitar, GHLBass and GHLRhythm sections for enabled difficulties, the matching song.ini ratings, shared tempo/meter, and Star Power. B3 is note 8; 5 and 6 remain modifiers. Format reference: https://thenathannator.github.io/GuitarGame_ChartFormats/Chart-File-Formats/chart-format/Tracks/6-Fret-Guitar/ . Older four-instrument project files migrate automatically. Charts are validated programmatically; review and play-test the generated parts in your target game.
+
+## Musical Star Power placement (v1.3.2)
+
+Star Power now follows the meter and tempo map for every part and difficulty. Phrases normally span two measures, changing toward one for dense passages or four for sparse ones. Placement favors section beginnings/endings and rhythmic transitions; phrase endings favor downbeats, accented attacks and chord emphasis. Phrases include the final emphasized hit, ending one tick after it.
+
+The hard spacing rule is **four full measures from the end of one phrase to the start of the next**. The planner targets about eight measures / 15 seconds and avoids gaps over 30 seconds when playable notes and minimum spacing allow. At slow tempos or through long rests these targets can conflict; the hard minimum is preserved and review notices explain the gap. Short final passages may need truncated phrases, also reported.
+
+Gold bands show the planned phrases in the pattern preview. Coverage notices appear below it, in CHARTING-REVIEW.txt and in conversion-report.json. The Generate Star Power checkbox turns generation off completely. Global note shifts move phrases with the notes, and changing BPM replans timed gaps. The quarter-bar collection/drain rule is used as placement guidance; the exported S 2 phrases let the game handle meter gain, activation and drain. Generated choices still need musical review against the recording.
+
+## Six-fret patterns and shapes (v1.3.2)
+
+The included GHL_All_Notes_and_Common_Patterns.md supplements the original Authentic GHL v2 ruleset. Its 64 mathematical states are a reference, not a list of chord shapes to generate. The mapper still avoids simultaneous open/fretted chords, four-to-six-button clusters, and barre-plus-other-fret grips.
+
+The phrase template library now includes black-first staircases, cross-row zigzags and additional alternating-row paths. Chord optimization favors natural neighboring dyads and penalizes large outer diagonals and crowded three-button grips. Sparse, musically justified triples remain available; rapid triad passages favor two buttons while retaining every Expert attack.
+
+Song details has an optional **GHL simple barres (Hard/Expert)** checkbox, off by default. Uncrowded octave dyads can use same-column black/white pairs; dense passages favor easier grips. Easy and Medium simplify barres. Square preview notes identify the paired buttons, and review notices flag these shapes for controller play-testing.
+
+The GHL review identifies common mapped sequences, including picking/tremolo, gallops, triplet runs, trills, row alternation, zigzags, staircases, chord repetition and chord shifts. These informational notices describe the generated chart rather than adding notes or modifiers. Picking, legato, taps, sustain timing and open-pedal eligibility still follow the original ruleset. Identical riffs remain deterministic. Older projects load with the new barre option disabled.

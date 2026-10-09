@@ -58,7 +58,9 @@ try {
             Object.assign(events[i], {hopo: !!note.isHammerPullDestination || !!beat.isLegatoDestination,
               tap: !!note.isLeftHandTapped, fret: note.fret, string: note.string,
               dead: !!note.isDead, palm_mute: !!note.isPalmMute || !!beat.isPalmMute,
-              staccato: !!note.isStaccato});
+              staccato: !!note.isStaccato, slide: !!note.slideInType || !!note.slideOutType,
+              bend: !!note.hasBend || !!beat.hasWhammyBar, tremolo: !!beat.tremoloSpeed,
+              picked: !(note.isHammerPullDestination || beat.isLegatoDestination || note.isLeftHandTapped)});
           }
         }
         continue;

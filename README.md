@@ -1,4 +1,4 @@
-# Charting Toolkit v1.1.0
+# Charting Toolkit v1.2.2
 
 by ShyTheProgrammer
 
@@ -12,8 +12,9 @@ Double-click **ChartingToolkit.exe**. Keep `vendor`, `gp_bridge.cjs`, and `examp
 2. Select Drums, Guitar, Bass, and Rhythm tracks. Check the note preview and drum mapping. The live collision summary under the preview updates after each MIDI reassignment and shows whether you reduced or increased overlapping hits. Expand collision details to see named source sounds and jump to their positions.
 3. Set the overall chart BPM directly on Score & tracks or in Song details. Both controls share one value for every instrument and difficulty, lyric timing, ratings and export; recordings are not stretched. Set song information, enabled difficulties, and optional rating overrides.
 4. Attach the matching recording in Pattern preview. Press **Play**, click the preview to seek, and drag its background waveform left/right to line it up with the notes. Use **< 1 bar** / **1 bar >** to move every charted instrument and difficulty together. Attach optional LRC lyrics, artwork, backgrounds, or synchronized stems.
-5. Choose an export folder and create the song package.
-6. Open `notes.chart` in Moonscraper, review timing and every difficulty and instrument, and playtest in Clone Hero.
+5. Open **Lyrics** to manage standard/enhanced LRC files, edit words and times, review repaired backward timestamps and align the first lyric to the audio playhead.
+6. Choose an export folder and create the song package.
+7. Open `notes.chart` in Moonscraper, review timing and every difficulty and instrument, and playtest in Clone Hero.
 
 Save/open projects preserve settings and file paths in JSON. Attached files remain at their original locations.
 
@@ -29,6 +30,24 @@ The note arrows change one shared offset in starting-meter bars across every ins
 
 Preview decoding uses up to 256 MB of audio memory (about 23 minutes of stereo sound). Longer recordings can still be exported, with alignment entered numerically. Playback requires an available audio output device. BPM changes move the musical grid; audio is not stretched.
 
+## LRC lyrics and alignment (v1.2.2)
+
+The **Lyrics** tab replaces the pitched-vocal screen. It opens or creates standard and enhanced LRC, provides editable timestamp/word rows and a raw-text editor, previews lyric markers over the recording waveform, and saves aligned LRC copies. Play/Pause, Stop, a seek slider, row-level **Seek** buttons and click-to-seek support reviewing synchronization. LRC editing and recording playback also work without a loaded Guitar Pro score. Pitched YARG vocals, vocal difficulty tags and `notes.mid` export have been removed.
+
+**Normal LRC:** each nonfinal phrase ends exactly one chart tick before the next phrase starts, even across tempo changes or long gaps. The final phrase reaches the chart end; the chart extends when necessary to contain the final lyric. Multiple line timestamps and embedded `[offset:...]` values remain supported.
+
+**Enhanced LRC:** words from a source line share one phrase and keep their written order. When a timestamp moves backward, the app finds the preceding valid lyric and the next later lyric, then spaces the intervening backward-timestamp run evenly between those two anchors. For example, times `10, 8, 7, 16` become `10, 12, 14, 16`. A later line can provide the next anchor. Runs with no following anchor, or too little time between anchors, show an actionable message so you can supply a valid later timestamp.
+
+The tab prominently notifies you about repairs and lists each affected lyric's source line, original time and repaired time. Edited lyrics and repair notices persist in saved projects. Export also writes the changes to `conversion-report.json` and `LYRIC-REVIEW.txt`, and the export summary/status reports the repair count. You can adjust timestamps later in the row editor or raw LRC text. **Use repaired timestamps in editor** updates the editable copy while retaining review notices.
+
+**Starting point:** seek to the first sung word and click **Align first lyric to playhead**, type the desired **First lyric at** time, or use the ±100 ms buttons/global lyric offset. Every lyric moves by the same amount; charted notes and audio keep their positions. The offset is saved with the project. Recording alignment is also added to the exported lyric timing, so padded/trimmed audio and lyrics stay together. Negative export times clamp to zero. `lyrics.lrc` and chart lyric events use the same repaired and adjusted timings.
+
+**Save aligned LRC copy** includes the current lyric offset and recording alignment. Normal/enhanced timestamp style and artist/title metadata are preserved; embedded file offsets are folded into the saved timestamps. In-memory editing and song export preserve the original LRC file. Choosing the original filename in the save dialog would explicitly replace it; use a new filename for a separate copy.
+
+For scores with embedded lyrics, **Make an LRC from Guitar Pro lyrics** imports a selected track/verse into the editor with current score timing and repeats. This is an editable timing snapshot: reimport after changing the score's BPM or bar position. It provides lyric text only, without generating pitched vocal gameplay.
+
+Use **Try lyric demo**, or launch with `--demo-lyrics --page=5`, to inspect the included backward-timestamp example and practice alignment against a synthesized recording.
+
 ## Included
 
 - Native Rust/egui interface: sidebar navigation, dark cards, mint accents, drag-and-drop import, and a playable five-lane note preview with a background waveform and shared alignment controls.
@@ -36,6 +55,7 @@ Preview decoding uses up to 256 MB of audio memory (about 23 minutes of stereo s
 - Named Pro Drums mapping, live collision counts and improvement feedback under the preview, highlighted collision positions, cymbal flags, Expert ghost/accent markers, optional velocity inference, strict collision checks, and automatic Expert double-kick alternation above 110 BPM.
 - Guitar/Bass/Rhythm Rulebook v1.0 policy: phrase contour and repeated-motif mapping, faithful Expert attacks, hierarchical difficulty arrangements, stable chord shapes, correct strum/HOPO flip markers, Expert-only taps, and tempo-aware sustain release clearance.
 - Pitched-instrument review warnings below the preview, with jump buttons, plus a full `CHARTING-REVIEW.txt` and structured findings in the conversion report.
+- LRC manager with editable lyric timestamps/text, automatic backward-timestamp interpolation and persistent review notices, waveform playback, first-lyric alignment, and optional Guitar Pro-to-LRC import.
 - Easy, Medium, Hard, and Expert generation, automatic Star Power, density-based 0–6 intensity estimates and overrides.
 - Song properties, standard/enhanced LRC import, embedded lyric offsets, physical audio alignment, artwork, backgrounds, preview audio, stems, highways, icons, and color profiles.
 - Unique song directories, staged export, conversion reports, and a silent practice WAV when audio is omitted.
@@ -47,7 +67,7 @@ The UI and conversion/export logic are Rust. Guitar Pro decoding intentionally r
 
 Guitar, Rhythm and Bass now follow the supplied [Charting Rulebook](CHARTING-RULEBOOK.md). See [Rulebook implementation](RULEBOOK-IMPLEMENTATION.md) for the exact automated policy and the musical decisions that still require listening. Easy uses three colored lanes and singles; Medium uses four colors and at most two-note chords; Hard uses all five colors without opens/taps; Expert retains all source attacks. Guitar Pro open strings remain colored notes. Purple bass notes require an explicit gameplay annotation on Expert, not a zero fret number.
 
-This recreates the original workflow rather than promising identical output. The Rust fret-mapping, difficulty-reduction, intensity, lyric-phrase, and Star Power heuristics are independent implementations. They do not reproduce every special-case rule in the original Python algorithms. Enhanced LRC words receive individual phrase boundaries; backward timestamps are sorted rather than repaired with the original interpolation rules. Timing comes from the Guitar Pro playback map; it is not automatically transcribed from the recording. These outputs are charting aids and require musical review. Intentional overlapping extended sustains and open chords are not generated automatically; individual chord-note releases are retained with conservative clearance before subsequent attacks. Aligned recordings and stems are converted to WAV; other media is copied intact. Custom assets under `Extras/Custom` require separate installation.
+This recreates the original workflow rather than promising identical output. The Rust fret-mapping, difficulty-reduction, intensity, lyric-phrase, and Star Power heuristics are independent implementations. They do not reproduce every special-case rule in the original Python algorithms. Enhanced LRC words share source-line phrases; backward timestamps are repaired by interpolation between valid lyric anchors. Timing comes from the Guitar Pro playback map; it is not automatically transcribed from the recording. These outputs are charting aids and require musical review. Intentional overlapping extended sustains and open chords are not generated automatically; individual chord-note releases are retained with conservative clearance before subsequent attacks. Aligned recordings and stems are converted to WAV; other media is copied intact. Custom assets under `Extras/Custom` require separate installation.
 
 ## Build from source
 
@@ -68,8 +88,14 @@ For the bundled end-to-end conversion check:
 ChartingToolkit.exe --smoke-test
 ```
 
-This exports both demos under `smoke-output`. `--demo` opens the guitar demo. `--demo-drums --demo-audio` opens the drum demo with a synthesized practice recording. `--capture` saves a preview screenshot using the application's own renderer and closes after capture. The optional native audio device check is `cargo test native_device_playback_clock_pause_and_seek -- --ignored` (silent playback).
+This exports all three demos under `smoke-output`. `--demo` opens the guitar demo. `--demo-drums --demo-audio` opens the drum demo with a synthesized practice recording. `--capture` saves a preview screenshot using the application's own renderer and closes after capture. The optional native audio device check is `cargo test native_device_playback_clock_pause_and_seek -- --ignored` (silent playback).
 
 ## Licensing
 
-Derived from Chart Starter by shytheprogrammer, under the MIT license retained in `LICENSE`. The alphaTab license is in `vendor/alphatab/LICENSE`; the Node license is in `vendor/NODE-LICENSE.txt`. The separate bundled FFmpeg executable is the Gyan.dev GPLv3 build `2025-08-25-git-1b62f9d3ae`; its license, source URL and build configuration are in `vendor/FFMPEG-LICENSE.txt` and `vendor/FFMPEG-BUILD-README.txt`. Rust dependency notices accompany the portable distribution under `licenses`, including Rodio/CPAL for native playback. The synthesized demo recording is provided under this project's MIT license. The original help reference is retained as `ORIGINAL-GUIDE.md`; use the in-app Guide for behavior specific to this Rust edition.
+Derived from Chart Starter by shytheprogrammer, under the MIT license retained in `LICENSE`. The alphaTab license is in `vendor/alphatab/LICENSE`; the Node license is in `vendor/NODE-LICENSE.txt`. The separate bundled FFmpeg executable is the Gyan.dev GPLv3 build `2025-08-25-git-1b62f9d3ae`; its license, source URL and build configuration are in `vendor/FFMPEG-LICENSE.txt` and `vendor/FFMPEG-BUILD-README.txt`. Rust dependency notices accompany the portable distribution under `licenses`, including Rodio/CPAL for native playback. The synthesized demo recordings is provided under this project's MIT license. The original help reference is retained as `ORIGINAL-GUIDE.md`; use the in-app Guide for behavior specific to this Rust edition.
+
+## Preview controls (v1.2.2)
+
+Extra media contains artwork, backgrounds, stems and other optional assets. All LRC file management, lyric editing and alignment lives in Lyrics. Attach the main recording in the pattern or lyric preview.
+
+Both previews offer quarter-beat navigation and independent Zoom in, Zoom out and Reset zoom controls (1–64 beats). These viewing controls do not alter exported timing. The pattern preview also offers quarter-bar note shifts; these move every instrument and difficulty together and are included in exports.

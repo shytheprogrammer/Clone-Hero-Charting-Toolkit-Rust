@@ -1,0 +1,11 @@
+/target/
+/smoke-output/
+/ChartStarter.exe
+/vendor/node.exe
+/vendor/ffmpeg.exe
+/studio-preview.png
+/pattern-preview.png
+/charting-preview.png
+/drum-mapping-preview.png
+
+/ChartingToolkit.exe

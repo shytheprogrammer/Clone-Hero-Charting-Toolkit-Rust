@@ -8,7 +8,7 @@ try {
     ppq: new a.midi.MidiFile().division,
     tracks: score.tracks.map(t => ({index: t.index, name: t.name, program: t.playbackInfo.program,
       percussion: t.staves.some(s => s.isPercussion), notes: [], techniques: {}})),
-    tempos: [], signatures: [], end: 0, tickShift: 0, sections: [], bars: []
+    vocal_lyrics: [], tempos: [], signatures: [], end: 0, tickShift: 0, sections: [], bars: []
   };
   // Capture the playback engine's events rather than approximating written durations.
   const handler = {
@@ -44,6 +44,10 @@ try {
       if (seen.has(key)) continue;
       seen.add(key);
       const track = beat.voice.bar.staff.track;
+      if (beat.lyrics) beat.lyrics.forEach((text, line) => {
+        if (text && text.trim()) result.vocal_lyrics.push({track: track.index, tick: start,
+          length: beat.playbackDuration, line, text: text.trim()});
+      });
       if (!beat.voice.bar.staff.isPercussion) {
         for (const note of beat.notes) {
           if (note.isTieDestination) continue;
